@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Renewable Energy Overview — Digital Twin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+  <!-- ══════════════ 3D VIEWPORT ══════════════ -->
+  <canvas id="scene-canvas"></canvas>
+
+  <!-- ══════════════ LOADING SCREEN ══════════════ -->
+  <div id="loader" class="loader">
+    <div class="loader__mark">
+      <svg viewBox="0 0 48 48" width="56" height="56">
+        <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(64,156,255,.25)" stroke-width="2.5"/>
+        <path d="M24 4 a20 20 0 0 1 20 20" fill="none" stroke="#409cff" stroke-width="2.5" stroke-linecap="round" class="loader__spin"/>
+        <circle cx="24" cy="24" r="7" fill="#0c1524" stroke="#409cff" stroke-width="1.5"/>
+        <circle cx="24" cy="24" r="2.5" fill="#65f2a5"/>
+      </svg>
+    </div>
+    <div class="loader__title">RENEWABLE&nbsp;GENERATION</div>
+    <div class="loader__sub">Initializing digital twin<span class="loader__dots"></span></div>
+    <div class="loader__bar"><div class="loader__bar-fill" id="loader-fill"></div></div>
+  </div>
+
+  <!-- ══════════════ DASHBOARD OVERLAY ══════════════ -->
+  <div id="ui" class="ui" aria-hidden="true">
+
+    <!-- ── Top bar ────────────────────────────── -->
+    <header class="topbar glass">
+      <div class="topbar__brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 48 48" width="30" height="30">
+            <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(120,180,255,.4)" stroke-width="3"/>
+            <path d="M24 5 a19 19 0 0 1 19 19" fill="none" stroke="#409cff" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="24" cy="24" r="6.5" fill="#0c1524" stroke="#7cc4ff" stroke-width="1.6"/>
+            <circle cx="24" cy="24" r="2.4" fill="#65f2a5"/>
+          </svg>
+        </div>
+        <h1 class="topbar__title">Renewable Energy Overview</h1>
+      </div>
+
+      <nav class="topbar__tabs glass-inset" id="top-tabs">
+        <button class="tab is-active" data-tab="overview">Overview</button>
+        <button class="tab" data-tab="analytics">Analytics</button>
+        <button class="tab" data-tab="devices">Devices</button>
+        <button class="tab" data-tab="reports">Reports</button>
+      </nav>
+
+      <div class="topbar__actions">
+        <button class="icon-btn" id="btn-theme" title="Display mode">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7"/><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.2 5.2l1.7 1.7M17.1 17.1l1.7 1.7M18.8 5.2l-1.7 1.7M6.9 17.1l-1.7 1.7"/></g></svg>
+        </button>
+        <button class="icon-btn icon-btn--dot" id="btn-alerts-top" title="Notifications">
+          <svg viewBox="0 0 24 24"><path d="M12 3.2c-3.3 0-5.4 2.4-5.4 5.6 0 4.6-1.9 5.6-1.9 7h14.6c0-1.4-1.9-2.4-1.9-7 0-3.2-2.1-5.6-5.4-5.6zM9.8 18.6a2.3 2.3 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        </button>
+        <button class="user-chip" title="Account">
+          <span class="user-chip__avatar">A</span>
+          <span class="user-chip__name">Admin</span>
+          <svg viewBox="0 0 24 24" width="14" height="14"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Left navigation rail ───────────────── -->
+    <aside class="rail glass">
+      <nav class="rail__nav" id="rail-nav">
+        <button class="rail__item is-active" data-nav="dashboard">
+          <svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v4.5h-7zM13 10.5h7V20h-7zM4 13h7v7H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="rail__item" data-nav="map">
+          <svg viewBox="0 0 24 24"><path d="M12 21s6.5-5.6 6.5-10.4A6.5 6.5 0 0 0 12 4a6.5 6.5 0 0 0-6.5 6.6C5.5 15.4 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          <span>Map</span>
+        </button>
+        <button class="rail__item" data-nav="devices">
+          <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 19.5h6M12 16v3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span>Devices</span>
+        </button>
+        <button class="rail__item" data-nav="analytics">
+          <svg viewBox="0 0 24 24"><path d="M5 20V10M10.5 20V4M16 20v-8M21 20H3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Analytics</span>
+        </button>
+        <button class="rail__item" data-nav="alerts">
+          <svg viewBox="0 0 24 24"><path d="M12 3.2c-3.3 0-5.4 2.4-5.4 5.6 0 4.6-1.9 5.6-1.9 7h14.6c0-1.4-1.9-2.4-1.9-7 0-3.2-2.1-5.6-5.4-5.6zM9.8 18.6a2.3 2.3 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg>
+          <span>Alerts</span>
+        </button>
+        <button class="rail__item" data-nav="settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.8l1.2 2.6 2.8-.6 1 2.7 2.7 1-.6 2.8 2.1 1.9-1.5 2.4.9 2.7-2.6 1.2v2.9l-2.9.1-1.5 2.5-2.6-1.3-2.6 1.3-1.5-2.5-2.9-.1v-2.9l-2.6-1.2.9-2.7L2 12.2l2.1-1.9-.6-2.8 2.7-1 1-2.7 2.8.6z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" opacity=".85"/></svg>
+          <span>Settings</span>
+        </button>
+      </nav>
+      <button class="rail__item rail__item--footer" data-nav="controls3d" id="btn-3d-controls">
+        <svg viewBox="0 0 24 24"><path d="M12 3l8 4.6v9L12 21l-8-4.4v-9L12 3zM12 12l8-4.4M12 12L4 7.6M12 12v9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>3D Controls</span>
+      </button>
+    </aside>
+
+    <!-- ── 3D Controls popover ─────────────────── -->
+    <div class="controls3d glass" id="controls3d-panel">
+      <div class="controls3d__title">Render Settings</div>
+      <label class="switch-row"><span>Bloom</span><input type="checkbox" id="opt-bloom" checked><i class="switch"></i></label>
+      <label class="switch-row"><span>Ambient occlusion</span><input type="checkbox" id="opt-ssao"><i class="switch"></i></label>
+      <label class="switch-row"><span>Shadows</span><input type="checkbox" id="opt-shadows" checked><i class="switch"></i></label>
+      <label class="switch-row"><span>Auto-orbit</span><input type="checkbox" id="opt-autorotate"><i class="switch"></i></label>
+      <label class="switch-row"><span>Power flow</span><input type="checkbox" id="opt-flow" checked><i class="switch"></i></label>
+    </div>
+
+    <!-- ── Live overview panel ─────────────────── -->
+    <section class="live glass" id="live-panel">
+      <header class="live__head">
+        <h2>Live Overview</h2>
+        <span class="live-pill"><i class="pulse-dot pulse-dot--green"></i>Live</span>
+      </header>
+
+      <div class="live__block">
+        <div class="stat-label">Total Generation</div>
+        <div class="live__total-row">
+          <div class="stat-hero"><span id="stat-total">0</span><small>GW</small></div>
+          <div class="stat-delta">
+            <span class="stat-delta__value">▲ 12.4%</span>
+            <span class="stat-delta__hint">vs yesterday</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="live__divider"></div>
+
+      <div class="live__split">
+        <div class="live__cell">
+          <div class="stat-label">Solar Generation</div>
+          <div class="stat-mid">
+            <svg viewBox="0 0 24 24" class="stat-ico stat-ico--sun"><circle cx="12" cy="12" r="4" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.8v2.2M12 19v2.2M2.8 12h2.2M19 12h2.2M5.4 5.4L7 7M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></g></svg>
+            <span id="stat-solar">0</span><small>GW</small>
+          </div>
+        </div>
+        <div class="live__cell">
+          <div class="stat-label">Wind Generation</div>
+          <div class="stat-mid">
+            <svg viewBox="0 0 24 24" class="stat-ico stat-ico--wind"><path d="M12 12.2 12 3.4a2.6 2.6 0 1 1 2.4 3.7zM12 12.2l7.6 4.4a2.6 2.6 0 1 1-4.3 1zM12 12.2 4.4 16.6a2.6 2.6 0 1 1 1.9-4.6z" fill="currentColor"/><circle cx="12" cy="12.2" r="1.4" fill="currentColor"/></svg>
+            <span id="stat-wind">0</span><small>GW</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="live__divider"></div>
+
+      <div class="live__block">
+        <div class="stat-label">Total Devices</div>
+        <div class="stat-mid stat-mid--devices">
+          <svg viewBox="0 0 24 24" class="stat-ico stat-ico--dev"><rect x="4" y="5" width="16" height="11" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 19.5h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span id="stat-devices">0</span>
+        </div>
+      </div>
+
+      <div class="live__split live__split--status">
+        <div class="live__cell">
+          <div class="stat-label">Active</div>
+          <div class="stat-status"><i class="pulse-dot pulse-dot--green"></i><span id="stat-active">0</span></div>
+        </div>
+        <div class="live__cell">
+          <div class="stat-label">Offline</div>
+          <div class="stat-status"><i class="pulse-dot pulse-dot--red"></i><span id="stat-offline">0</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Bottom toolbar ──────────────────────── -->
+    <div class="toolbar glass" id="toolbar">
+      <button class="tool" data-tool="select">
+        <svg viewBox="0 0 24 24"><path d="M6.5 3.8l12 7.4-5.3 1.3-1.6 5.3-5.1-14z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        <span>Select</span>
+      </button>
+      <button class="tool" data-tool="pan">
+        <svg viewBox="0 0 24 24"><path d="M9.2 11V5.2a1.3 1.3 0 0 1 2.6 0V10M11.8 10V4.2a1.3 1.3 0 0 1 2.6 0V10M14.4 10.4V5.9a1.3 1.3 0 0 1 2.6 0v6.9c0 3.9-2.2 7-6 7-2.9 0-4.3-1.4-5.6-3.7l-2-3.6c-.6-1-.1-2 .8-2.3.8-.3 1.6.1 2.1.9l1 1.5V7a1.3 1.3 0 0 1 2.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Pan</span>
+      </button>
+      <button class="tool is-active" data-tool="rotate">
+        <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.9-6.2M20 3.5v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Rotate</span>
+      </button>
+      <span class="toolbar__sep"></span>
+      <button class="tool tool--action" data-tool="zoom-in">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l4.2 4.2M8.4 11h5.2M11 8.4v5.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>Zoom In</span>
+      </button>
+      <button class="tool tool--action" data-tool="zoom-out">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l4.2 4.2M8.4 11h5.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>Zoom Out</span>
+      </button>
+      <button class="tool tool--action" data-tool="reset">
+        <svg viewBox="0 0 24 24"><rect x="4.5" y="7" width="15" height="11" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 7V5.4A1.4 1.4 0 0 1 10.4 4h3.2A1.4 1.4 0 0 1 15 5.4V7" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>Reset View</span>
+      </button>
+    </div>
+
+    <!-- ── Legend ──────────────────────────────── -->
+    <section class="legend glass" id="legend">
+      <div class="legend__title">Legend</div>
+      <div class="legend__grid">
+        <div class="legend__item"><i class="lg-line" style="--c:#3f8cff"></i>Solar Array</div>
+        <div class="legend__item"><i class="lg-line" style="--c:#31e981"></i>AC Connection</div>
+        <div class="legend__item">
+          <svg viewBox="0 0 24 24" width="15" height="15" class="lg-ico"><path d="M12 12.2 12 4.4a2.4 2.4 0 1 1 2.2 3.4zM12 12.2l6.8 3.9a2.4 2.4 0 1 1-3.9.9zM12 12.2 5.2 16.1a2.4 2.4 0 1 1 1.7-4.2z" fill="currentColor"/></svg>
+          Wind Turbine
+        </div>
+        <div class="legend__item"><i class="lg-line" style="--c:#ff4f5e"></i>DC Connection</div>
+        <div class="legend__item"><i class="lg-swatch" style="--c:#31e981"></i>Inverter</div>
+        <div class="legend__item"><i class="lg-line lg-line--dash" style="--c:#9aa7b8"></i>Road</div>
+        <div class="legend__item"><i class="lg-swatch" style="--c:#ffc233"></i>Transformer</div>
+        <div class="legend__item"><i class="lg-line lg-line--dash2" style="--c:#c7d2e0"></i>Boundary</div>
+      </div>
+    </section>
+
+    <!-- ── Object info card (raycast selection) ── -->
+    <article class="infocard glass" id="infocard">
+      <header class="infocard__head">
+        <div>
+          <div class="infocard__type" id="ic-type">SOLAR ARRAY</div>
+          <h3 class="infocard__name" id="ic-name">SA-0412</h3>
+        </div>
+        <button class="icon-btn infocard__close" id="ic-close">
+          <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+      <div class="infocard__status" id="ic-status"><i class="pulse-dot pulse-dot--green"></i><span>Operational</span></div>
+      <dl class="infocard__rows" id="ic-rows"></dl>
+      <div class="infocard__spark">
+        <div class="stat-label">Output — last 12h</div>
+        <div class="sparkline" id="ic-spark"></div>
+      </div>
+      <button class="infocard__cta" id="ic-focus">Focus camera</button>
+    </article>
+
+    <!-- ── Hover tooltip ──────────────────────── -->
+    <div class="hovertip glass" id="hovertip"></div>
+
+    <!-- ── Toast ──────────────────────────────── -->
+    <div class="toast glass" id="toast"></div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
