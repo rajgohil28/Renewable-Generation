@@ -16,7 +16,8 @@ const CABLE_VERT = /* glsl */ `
 `;
 
 // u (vUv.x) runs 0→1 along the tube. Several pulses travel the length,
-// each a smooth hot band over a dim always-on core.
+// each configured with a bright white-hot center core, a beautiful tapered outline,
+// and crackling high-frequency electricity shimmers.
 const CABLE_FRAG = /* glsl */ `
   uniform vec3 uColor;
   uniform float uTime;
@@ -26,11 +27,37 @@ const CABLE_FRAG = /* glsl */ `
   varying vec2 vUv;
 
   void main() {
+    // 1. Crackling high-frequency electrical shimmers (animated noise)
+    float shimmer = sin(vUv.x * 160.0 - uTime * 36.0) * 0.08 * sin(vUv.x * 60.0 + uTime * 14.0);
+    
+    // 2. Pulse math (smooth loop coordinate)
     float t = fract(vUv.x * uPulses - uTime * uSpeed);
-    float pulse = smoothstep(0.0, 0.42, t) * (1.0 - smoothstep(0.42, 0.55, t));
-    pulse = pow(pulse, 2.2);
-    vec3 color = uColor * (0.35 + pulse * uIntensity);
-    gl_FragColor = vec4(color, 1.0);
+    
+    // Smooth trailing edge, sharper leading edge. Peak at t = 0.5.
+    float pulse = smoothstep(0.08, 0.5, t) * (1.0 - smoothstep(0.5, 0.64, t));
+    pulse = pow(pulse, 2.6);
+
+    // 3. Bulge and Taper profile (based on circular cross-section silhouette)
+    // edge runs from 0 at the side borders to 1 at the center-line of the 3D tube.
+    float edge = sin(vUv.y * 3.14159265);
+    
+    // The pulse physically widens at the peak and tapers down to a thin thread in the trail
+    float pulseWidth = 0.22 + 0.78 * pulse;
+    float pulseGlow = smoothstep(1.0 - pulseWidth, 1.0, edge);
+
+    // 4. Color composite
+    // A dim, always-lit cable background with crackling electrical hums
+    float baseCore = 0.16 + shimmer;
+    
+    // Saturated glow surrounding the pulse
+    vec3 glowColor = uColor * (baseCore + pulse * uIntensity * pulseGlow);
+    
+    // Intense, narrow, white-hot core at the peak of the surge
+    float coreVal = pow(pulse, 6.0);
+    vec3 hotCore = vec3(2.0, 2.0, 2.0) * coreVal * uIntensity * smoothstep(0.85, 1.0, edge);
+    
+    vec3 finalColor = glowColor + hotCore;
+    gl_FragColor = vec4(finalColor, 1.0);
   }
 `;
 
@@ -91,7 +118,7 @@ export class PowerFlow {
           uniforms: {
             uColor: { value: color },
             uTime: { value: 0 },
-            uSpeed: { value: 0.5 + Math.random() * 0.4 },
+            uSpeed: { value: 1.0 + Math.random() * 0.5 },
             uPulses: { value: Math.max(2, Math.round(length / 26)) },
             uIntensity: { value: 2.6 },
           },

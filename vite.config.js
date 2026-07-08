@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: '/Renewable-Generation/',
   server: {
     port: Number(process.env.PORT) || 5173,
     strictPort: false,

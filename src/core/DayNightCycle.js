@@ -12,6 +12,69 @@ import * as THREE from 'three';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { PALETTE, QUALITY } from '../config/settings.js';
 
+/** Helper to create a soft, round glowing texture for stars. */
+function createStarTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 16;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+  g.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  g.addColorStop(0.35, 'rgba(255, 255, 255, 0.7)');
+  g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 16, 16);
+  return new THREE.CanvasTexture(canvas);
+}
+
+/** Helper to create a detailed moon texture with cyan glow corona and craters. */
+function createMoonTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  
+  // 1. Cyan/Blue outer corona glow
+  let g = ctx.createRadialGradient(64, 64, 20, 64, 64, 64);
+  g.addColorStop(0, 'rgba(215, 235, 255, 1)');
+  g.addColorStop(0.35, 'rgba(140, 190, 255, 0.65)');
+  g.addColorStop(0.65, 'rgba(90, 140, 255, 0.18)');
+  g.addColorStop(1, 'rgba(90, 140, 255, 0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  
+  // 2. Moon solid disk clip
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(64, 64, 26, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+  
+  // Base moon surface color
+  ctx.fillStyle = '#f2f6ff';
+  ctx.fillRect(0, 0, 128, 128);
+  
+  // Crater overlays
+  ctx.fillStyle = 'rgba(135, 165, 205, 0.28)';
+  const craters = [
+    [54, 52, 6], [74, 58, 8], [60, 76, 5], [48, 68, 7], 
+    [72, 72, 4], [52, 44, 4], [80, 50, 5], [64, 64, 10]
+  ];
+  for (const [cx, cy, cr] of craters) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Sub-crater highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+    ctx.beginPath();
+    ctx.arc(cx + cr * 0.2, cy - cr * 0.2, cr * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(135, 165, 205, 0.28)';
+  }
+  
+  ctx.restore();
+  return new THREE.CanvasTexture(canvas);
+}
+
 const NIGHT = {
   fog: new THREE.Color(PALETTE.fog),
   fogDensity: 0.0026,
@@ -61,6 +124,48 @@ export class DayNightCycle {
     u.mieDirectionalG.value = 0.85;
     scene.add(this.sky);
 
+    // Create Starry sky
+    const starVertices = [];
+    const starCount = 1200;
+    for (let i = 0; i < starCount; i++) {
+      const uVal = Math.random();
+      const vVal = Math.random();
+      const theta = uVal * 2.0 * Math.PI;
+      const phi = Math.acos(vVal); // Upper hemisphere only
+      const r = 2600; // far background
+      
+      const x = r * Math.sin(phi) * Math.cos(theta);
+      const y = r * Math.cos(phi);
+      const z = r * Math.sin(phi) * Math.sin(theta);
+      starVertices.push(x, y, z);
+    }
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+    
+    this.starMat = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 11,
+      map: createStarTexture(),
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true,
+    });
+    this.stars = new THREE.Points(starGeo, this.starMat);
+    scene.add(this.stars);
+
+    // Create Moon
+    this.moonMat = new THREE.MeshBasicMaterial({
+      map: createMoonTexture(),
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    this.moon = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), this.moonMat);
+    scene.add(this.moon);
+
     this.sunDir = new THREE.Vector3();
     this.setHour(21); // matches the original nighttime look
   }
@@ -84,6 +189,19 @@ export class DayNightCycle {
 
     // Sky dome only earns its draw call once any twilight is visible
     this.sky.visible = elevDeg > -9;
+
+    // — Stars & Moon visibility and animation —
+    // t goes 0 (night) to 1 (day)
+    this.starMat.opacity = (1 - t) * 0.85;
+    this.moonMat.opacity = (1 - t) * 0.95;
+    this.stars.visible = this.starMat.opacity > 0.01;
+    this.moon.visible = this.moonMat.opacity > 0.01;
+
+    // Position moon opposite the sun direction
+    if (this.moon.visible) {
+      this.moon.position.copy(this.sunDir).multiplyScalar(-1800);
+      this.moon.lookAt(0, 0, 0);
+    }
 
     // — Fog & background —
     this.scene.fog.color.copy(NIGHT.fog).lerp(DAY.fog, t);
