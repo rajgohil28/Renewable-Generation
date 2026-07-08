@@ -8,11 +8,13 @@ import { QUALITY } from '../config/settings.js';
 export class LightingManager {
   constructor(scene) {
     // Ambient floor so blacks never crush completely
-    scene.add(new THREE.AmbientLight(0x1c2740, 1.15));
+    this.ambient = new THREE.AmbientLight(0x1c2740, 1.15);
+    scene.add(this.ambient);
 
     // Sky/ground bounce — cold blue sky, faint asphalt bounce
     const hemi = new THREE.HemisphereLight(0x33477a, 0x0b0e14, 0.75);
     scene.add(hemi);
+    this.hemi = hemi;
 
     // Moonlight key — the single shadow caster
     const moon = new THREE.DirectionalLight(0xbfd4ff, 1.9);
@@ -37,17 +39,18 @@ export class LightingManager {
     rim.position.set(140, 60, -120);
     scene.add(rim);
 
-    // Warm sodium floodlights near the facility core
+    // Warm sodium floodlights near the facility core (faded out by day)
     const flood1 = new THREE.PointLight(0xffb45e, 260, 90, 2);
     flood1.position.set(14, 16, 10);
-    scene.add(flood1);
 
     const flood2 = new THREE.PointLight(0x6fa8ff, 200, 80, 2);
     flood2.position.set(-46, 14, -2);
-    scene.add(flood2);
 
     const flood3 = new THREE.PointLight(0xffb45e, 160, 70, 2);
     flood3.position.set(64, 12, 30);
-    scene.add(flood3);
+
+    this.floods = [flood1, flood2, flood3];
+    this.floodBaseIntensity = this.floods.map((f) => f.intensity);
+    scene.add(...this.floods);
   }
 }

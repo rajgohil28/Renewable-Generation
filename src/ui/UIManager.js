@@ -61,14 +61,14 @@ export class UIManager {
     this.el.ui.setAttribute('aria-hidden', 'false');
     const panels = [
       document.querySelector('.topbar'),
-      document.querySelector('.rail'),
+      document.getElementById('timeday'),
       this.el.live,
       this.el.toolbar,
       this.el.legend,
     ];
     gsap.from(panels, {
       opacity: 0,
-      y: (i) => [-18, 0, 0, 22, 22][i],
+      y: (i) => [-18, 22, 0, 22, 22][i],
       x: (i) => [0, -22, 26, 0, 0][i],
       duration: 0.9,
       stagger: 0.09,
@@ -118,18 +118,24 @@ export class UIManager {
   // ── Chrome: tabs, rail, toolbar, 3D controls ────────────────────
 
   #bindChrome() {
-    // Top tabs + rail items — visual state only (single-view demo)
+    // System filter tabs: Solar + Wind / Solar / Wind
     document.querySelectorAll('#top-tabs .tab').forEach((tab) => {
       tab.addEventListener('click', () => {
         document.querySelector('#top-tabs .is-active')?.classList.remove('is-active');
         tab.classList.add('is-active');
+        this.callbacks.onFilter?.(tab.dataset.filter);
       });
     });
-    document.querySelectorAll('#rail-nav .rail__item').forEach((item) => {
-      item.addEventListener('click', () => {
-        document.querySelector('#rail-nav .is-active')?.classList.remove('is-active');
-        item.classList.add('is-active');
-      });
+
+    // Time-of-day slider
+    const slider = document.getElementById('time-slider');
+    const label = document.getElementById('time-label');
+    slider.addEventListener('input', () => {
+      const h = parseFloat(slider.value);
+      const hh = String(Math.floor(h) % 24).padStart(2, '0');
+      const mm = String(Math.round((h % 1) * 60)).padStart(2, '0');
+      label.textContent = `${hh}:${mm}`;
+      this.callbacks.onTime?.(h);
     });
 
     // Toolbar

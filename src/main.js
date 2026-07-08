@@ -3,4 +3,5 @@
  */
 import { App } from './App.js';
 
-new App();
+// Exposed for debugging / console telemetry inspection
+window.__twin = new App();

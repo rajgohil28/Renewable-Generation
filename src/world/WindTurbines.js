@@ -3,6 +3,7 @@
  * nacelles, spinning three-blade rotors and blinking aviation lights.
  */
 import * as THREE from 'three';
+import gsap from 'gsap';
 import { TURBINES } from '../config/settings.js';
 
 /** Tapered airfoil-ish blade outline, extruded thin. */
@@ -33,11 +34,13 @@ export class WindTurbines {
     this.units = [];
     this.pickables = [];
 
-    const white = new THREE.MeshStandardMaterial({ color: 0xe8eaee, metalness: 0.25, roughness: 0.4 });
-    const nacelleMat = new THREE.MeshStandardMaterial({ color: 0xd7dade, metalness: 0.4, roughness: 0.35 });
+    // Shared across every turbine so the wind fleet can be dimmed with
+    // two material tweens when the solar filter is active.
+    this.towerMat = new THREE.MeshStandardMaterial({ color: 0xe8eaee, metalness: 0.25, roughness: 0.4 });
+    this.nacelleMat = new THREE.MeshStandardMaterial({ color: 0xd7dade, metalness: 0.4, roughness: 0.35 });
 
     TURBINES.forEach((cfg, i) => {
-      const unit = this.#buildTurbine(cfg, i, white, nacelleMat);
+      const unit = this.#buildTurbine(cfg, i, this.towerMat, this.nacelleMat);
       this.group.add(unit.root);
       this.units.push(unit);
       this.pickables.push(unit.root);
@@ -118,6 +121,37 @@ export class WindTurbines {
         ['Vibration', 'Nominal'],
       ],
     };
+  }
+
+  /**
+   * Filter response for the fleet, driven by one tweened state:
+   *   'wind'  — towers pick up a cool blue emissive glow
+   *   'solar' — fleet fades towards charcoal
+   *   'both'  — neutral baseline
+   */
+  setFilterMode(mode) {
+    const target = {
+      wind: { k: 1, em: 0.5 },
+      solar: { k: 0.2, em: 0 },
+      both: { k: 1, em: 0 },
+    }[mode] ?? { k: 1, em: 0 };
+
+    this.fx ??= { k: 1, em: 0 };
+    gsap.to(this.fx, {
+      ...target,
+      duration: 0.7,
+      ease: 'power2.inOut',
+      overwrite: 'auto',
+      onUpdate: () => {
+        const { k, em } = this.fx;
+        this.towerMat.color.setHex(0xe8eaee).multiplyScalar(k);
+        this.nacelleMat.color.setHex(0xd7dade).multiplyScalar(k);
+        this.towerMat.emissive.setHex(0x1c55b0);
+        this.nacelleMat.emissive.setHex(0x1c55b0);
+        this.towerMat.emissiveIntensity = em;
+        this.nacelleMat.emissiveIntensity = em;
+      },
+    });
   }
 
   update(dt, elapsed) {

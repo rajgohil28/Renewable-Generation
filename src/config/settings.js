@@ -64,7 +64,10 @@ export const CAMERA = {
 };
 
 export const QUALITY = {
-  maxPixelRatio: 2,
+  // 1.5 keeps text/edges crisp with SMAA while cutting fill-rate ~45%
+  // versus native 2.0 on retina displays — the difference is invisible
+  // at typical viewing distance, the frame-time win is not.
+  maxPixelRatio: 1.5,
   shadowMapSize: 2048,
   bloom: { strength: 0.58, radius: 0.65, threshold: 0.72 },
 };

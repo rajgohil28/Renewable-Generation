@@ -4,6 +4,7 @@
  * Random tilt, yaw jitter, spacing jitter and dropout kill the repetition.
  */
 import * as THREE from 'three';
+import gsap from 'gsap';
 import { PALETTE, SOLAR } from '../config/settings.js';
 import { createSolarCellTexture } from '../utils/textures.js';
 
@@ -122,6 +123,38 @@ export class SolarFarm {
         ['Uptime', '99.2 %'],
       ],
     };
+  }
+
+  /**
+   * Filter response for the whole farm, driven by one tweened state:
+   *   'solar' — cells illuminate (bright blue emissive feeding bloom)
+   *   'wind'  — farm fades towards charcoal
+   *   'both'  — neutral baseline
+   */
+  setFilterMode(mode) {
+    const target = {
+      solar: { k: 1, em: 1.05, blend: 1 },
+      wind: { k: 0.22, em: 0.03, blend: 0 },
+      both: { k: 1, em: 0.14, blend: 0 },
+    }[mode] ?? { k: 1, em: 0.14, blend: 0 };
+
+    this.fx ??= { k: 1, em: 0.14, blend: 0 };
+    const baseEmissive = new THREE.Color(PALETTE.panelBlue);
+    const litEmissive = new THREE.Color(0x2f7dff);
+    gsap.to(this.fx, {
+      ...target,
+      duration: 0.7,
+      ease: 'power2.inOut',
+      overwrite: 'auto',
+      onUpdate: () => {
+        const { k, em, blend } = this.fx;
+        const mat = this.glass.material;
+        mat.color.setScalar(k);
+        mat.emissiveIntensity = em;
+        mat.emissive.copy(baseEmissive).lerp(litEmissive, blend);
+        this.frame.material.color.set(PALETTE.aluminum).multiplyScalar(k);
+      },
+    });
   }
 
   /** World position of one panel instance (for camera focus). */

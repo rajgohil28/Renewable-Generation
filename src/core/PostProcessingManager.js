@@ -54,12 +54,18 @@ export class PostProcessingManager {
     this.ssaoPass.enabled = false;
     this.composer.addPass(this.ssaoPass);
 
+    // Half-res bloom: the gaussian mip chain dominates post cost at full
+    // res, while glow is inherently low-frequency — no visible loss.
+    // EffectComposer re-applies full size through pass.setSize() on every
+    // addPass/resize, so the downscale must live inside setSize itself.
     this.bloomPass = new UnrealBloomPass(
       size.clone().multiplyScalar(0.5),
       QUALITY.bloom.strength,
       QUALITY.bloom.radius,
       QUALITY.bloom.threshold,
     );
+    const bloomSetSize = this.bloomPass.setSize.bind(this.bloomPass);
+    this.bloomPass.setSize = (w, h) => bloomSetSize(w * 0.5, h * 0.5);
     this.composer.addPass(this.bloomPass);
 
     this.vignettePass = new ShaderPass(VignetteShader);
@@ -80,6 +86,11 @@ export class PostProcessingManager {
   setSSAO(enabled) {
     this.ssaoPass.enabled = enabled;
     this.renderPass.enabled = !enabled;
+  }
+
+  setPixelRatio(pr) {
+    this.composer.setPixelRatio(pr);
+    this.composer.setSize(window.innerWidth, window.innerHeight);
   }
 
   render(delta) {

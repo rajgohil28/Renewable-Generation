@@ -9,8 +9,9 @@ import { CAMERA } from '../config/settings.js';
 
 export class CameraManager {
   constructor(canvas) {
+    // Far plane covers the 3000-unit sky dome corners
     this.camera = new THREE.PerspectiveCamera(
-      CAMERA.fov, window.innerWidth / window.innerHeight, 0.5, 1600,
+      CAMERA.fov, window.innerWidth / window.innerHeight, 0.5, 6000,
     );
     this.camera.position.copy(CAMERA.flyFrom);
 

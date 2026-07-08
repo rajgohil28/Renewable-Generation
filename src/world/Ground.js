@@ -88,15 +88,14 @@ export class Ground {
   }
 
   #buildWater() {
-    const water = new THREE.Mesh(
-      new THREE.PlaneGeometry(2400, 2400),
-      new THREE.MeshStandardMaterial({
-        color: PALETTE.water,
-        metalness: 0.75,
-        roughness: 0.22,
-        envMapIntensity: 0.8,
-      }),
-    );
+    // Exposed so DayNightCycle can grade it from ink-black to steel blue
+    this.waterMat = new THREE.MeshStandardMaterial({
+      color: PALETTE.water,
+      metalness: 0.55,
+      roughness: 0.48,
+      envMapIntensity: 0.6,
+    });
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), this.waterMat);
     water.rotation.x = -Math.PI / 2;
     water.position.y = -PLATFORM.thickness - 0.6;
     this.group.add(water);
