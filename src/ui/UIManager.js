@@ -39,6 +39,7 @@ export class UIManager {
     };
     this.callbacks = {};
     this.#bindChrome();
+    this.#startClock();
   }
 
   /** Register scene-side handlers: onTool, onToggle, onFocusRequest. */
@@ -113,6 +114,28 @@ export class UIManager {
       s.solar.textContent = drift(STATS.solar, 0.4, 0);
       s.wind.textContent = drift(STATS.wind, 0.5, 1);
     }, 4000);
+  }
+
+  /** Run clock updating time & date dynamically every second. */
+  #startClock() {
+    const timeEl = document.getElementById('clock-time');
+    const dateEl = document.getElementById('clock-date');
+    if (!timeEl || !dateEl) return;
+
+    const update = () => {
+      const now = new Date();
+      const hrs = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      timeEl.textContent = `${hrs}:${mins} IST`;
+
+      const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+      // Format to e.g. "Wednesday, 8 Jul 2026"
+      const dateStr = now.toLocaleDateString('en-US', options);
+      dateEl.textContent = dateStr;
+    };
+
+    update();
+    setInterval(update, 1000);
   }
 
   // ── Chrome: tabs, rail, toolbar, 3D controls ────────────────────
