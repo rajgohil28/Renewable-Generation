@@ -276,3 +276,80 @@ export function createBuildingWallTexture() {
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
+
+/** Tileable dry cracked-earth wasteland texture. */
+export function createWastelandTexture() {
+  const S = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = S; canvas.height = S;
+  const ctx = canvas.getContext('2d');
+
+  // Dry sandy/clay base
+  ctx.fillStyle = '#bf8e69';
+  ctx.fillRect(0, 0, S, S);
+
+  // Speckle noise
+  for (let i = 0; i < 8000; i++) {
+    const v = Math.random();
+    ctx.fillStyle = v > 0.5 ? 'rgba(77,50,33,0.12)' : 'rgba(223,177,148,0.15)';
+    ctx.fillRect(Math.random() * S, Math.random() * S, Math.random() * 2 + 1, Math.random() * 2 + 1);
+  }
+
+  // Draw cracked clay veins
+  ctx.strokeStyle = 'rgba(74,51,36,0.32)';
+  ctx.lineWidth = 1.4;
+  const points = [];
+  const cells = 8;
+  const step = S / cells;
+  for (let r = 0; r <= cells; r++) {
+    for (let c = 0; c <= cells; c++) {
+      points.push({
+        x: c * step + (Math.random() - 0.5) * step * 0.7,
+        y: r * step + (Math.random() - 0.5) * step * 0.7,
+      });
+    }
+  }
+
+  // Connect neighboring points to form crack patterns
+  for (let r = 0; r < cells; r++) {
+    for (let c = 0; c < cells; c++) {
+      const idx = r * (cells + 1) + c;
+      const p1 = points[idx];
+      const p2 = points[idx + 1];
+      const p3 = points[idx + cells + 1];
+      const p4 = points[idx + cells + 2];
+
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p4.x, p4.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+    }
+  }
+
+  // Add some secondary, finer micro-cracks
+  ctx.strokeStyle = 'rgba(74,51,36,0.18)';
+  ctx.lineWidth = 0.8;
+  for (let i = 0; i < 35; i++) {
+    let cx = Math.random() * S;
+    let cy = Math.random() * S;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    for (let j = 0; j < 4; j++) {
+      cx += (Math.random() - 0.5) * 20;
+      cy += (Math.random() - 0.5) * 20;
+      ctx.lineTo(cx, cy);
+    }
+    ctx.stroke();
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(50, 50);
+  tex.anisotropy = 8;
+  return tex;
+}

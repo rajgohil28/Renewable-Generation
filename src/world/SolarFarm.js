@@ -97,7 +97,7 @@ export class SolarFarm {
           const z = f.cz + lx * Math.sin(f.yaw) + lz * Math.cos(f.yaw);
           e.set(
             SOLAR.tilt + (Math.random() - 0.5) * 0.05,
-            f.yaw + (Math.random() - 0.5) * 0.04,
+            f.yaw - Math.PI / 2 + (Math.random() - 0.5) * 0.04,
             (Math.random() - 0.5) * 0.02,
           );
           m.compose(p.set(x, 1.28, z), q.setFromEuler(e), s);

@@ -32,10 +32,10 @@ export class FloorText {
   #build() {
     const font = new FontLoader().parse(fontData);
 
-    // ── TOTAL POWER CAPACITY / 86.7 GW ──
+    // ── TOTAL POWER CAPACITY / 30 GW ──
     this.#addFrame(56, -10, 74, 26);
     this.#addText(font, 'TOTAL POWER CAPACITY', { x: 56, z: -17, size: 3.4 });
-    this.#addText(font, '86.7 GW', { x: 56, z: -6.5, size: 8 });
+    this.#addText(font, '30 GW', { x: 56, z: -6.5, size: 8 });
 
     // ── SOLAR 26 GW ──
     this.#addFrame(35, 16, 34, 22);
@@ -43,11 +43,11 @@ export class FloorText {
     this.#addText(font, '26 GW', { x: 35, z: 20, size: 6 });
     this.#addUnderline(35, 25.5, 17, PALETTE.flowBlue);
 
-    // ── WIND 30.7 GW ──
+    // ── WIND 4 GW ──
     this.#addFrame(79, 16, 40, 22);
     this.#addText(font, 'WIND', { x: 79, z: 11, size: 3 });
-    this.#addText(font, '30.7 GW', { x: 79, z: 20, size: 6 });
-    this.#addUnderline(79, 25.5, 21, PALETTE.flowBlue);
+    this.#addText(font, '4 GW', { x: 79, z: 20, size: 6 });
+    this.#addUnderline(79, 25.5, 14, PALETTE.flowBlue);
 
     // ── 30 GW BY 2030 ──
     this.#addFrame(56, 42, 74, 15);

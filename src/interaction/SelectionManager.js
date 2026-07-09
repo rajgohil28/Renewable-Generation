@@ -8,6 +8,7 @@
  */
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { SOLAR } from '../config/settings.js';
 
 export class SelectionManager {
   constructor({ canvas, camera, cameraManager, solarFarm, turbines, structures, ui }) {
@@ -36,7 +37,7 @@ export class SelectionManager {
   }
 
   #makeBracket() {
-    const geo = new THREE.PlaneGeometry(3.9, 2.55);
+    const geo = new THREE.PlaneGeometry(SOLAR.panelW * 1.12, SOLAR.panelH * 1.18);
     const edges = new THREE.EdgesGeometry(geo);
     const mat = new THREE.LineBasicMaterial({
       color: new THREE.Color(0x3f8cff).multiplyScalar(2.4),

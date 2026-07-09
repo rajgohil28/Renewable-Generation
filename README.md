@@ -21,7 +21,7 @@ procedurally generated at runtime.
   transformer stations with cooling fins and hazard bands, inverter
   cabinets with breathing LED strips, fenced HV substation
 - Engraved metallic floor typography (`TextGeometry`): TOTAL POWER
-  CAPACITY · 86.7 GW · SOLAR 26 GW · WIND 30.7 GW · 30 GW BY 2030
+  CAPACITY · 30 GW · SOLAR 26 GW · WIND 4 GW · 30 GW BY 2030
 - Animated power distribution: `CatmullRomCurve3` + `TubeGeometry` cables
   with a custom pulse shader — green AC, blue data, violet comms, amber
   transformer loops — all feeding Unreal Bloom

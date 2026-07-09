@@ -5,7 +5,7 @@
  */
 import * as THREE from 'three';
 import { PALETTE, PLATFORM, PLATFORM_OUTLINE } from '../config/settings.js';
-import { createSitePlanTexture, createSiteRoughnessTexture } from '../utils/textures.js';
+import { createSitePlanTexture, createSiteRoughnessTexture, createWastelandTexture } from '../utils/textures.js';
 
 export class Ground {
   constructor() {
@@ -88,12 +88,13 @@ export class Ground {
   }
 
   #buildWater() {
-    // Exposed so DayNightCycle can grade it from ink-black to steel blue
+    // Exposed so DayNightCycle can grade it from night dark-earth to day sun-baked clay
     this.waterMat = new THREE.MeshStandardMaterial({
-      color: PALETTE.water,
-      metalness: 0.55,
-      roughness: 0.48,
-      envMapIntensity: 0.6,
+      map: createWastelandTexture(),
+      color: 0xffffff,
+      metalness: 0.05,
+      roughness: 0.94,
+      envMapIntensity: 0.4,
     });
     const water = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), this.waterMat);
     water.rotation.x = -Math.PI / 2;

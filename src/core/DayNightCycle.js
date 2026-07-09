@@ -104,8 +104,8 @@ const DAY = {
   bloomThreshold: 1.5,
 };
 
-const WATER_NIGHT = new THREE.Color(PALETTE.water);
-const WATER_DAY = new THREE.Color(0x33516e);
+const WATER_NIGHT = new THREE.Color(0x16120e);
+const WATER_DAY = new THREE.Color(0xffebd6);
 
 export class DayNightCycle {
   constructor({ scene, lighting, renderer, postFX, ground }) {
@@ -167,7 +167,7 @@ export class DayNightCycle {
     scene.add(this.moon);
 
     this.sunDir = new THREE.Vector3();
-    this.setHour(21); // matches the original nighttime look
+    this.setHour(18); // default to 6 PM (18:00)
   }
 
   /**
@@ -229,9 +229,9 @@ export class DayNightCycle {
       f.intensity = this.lighting.floodBaseIntensity[i] * (1 - t);
     });
 
-    // — Water: ink-black mirror at night, steel-blue sea by day —
+    // — Wasteland: dark warm earth at night, sun-baked clay by day ──
     this.ground.waterMat.color.copy(WATER_NIGHT).lerp(WATER_DAY, t);
-    this.ground.waterMat.roughness = THREE.MathUtils.lerp(0.48, 0.34, t);
+    this.ground.waterMat.roughness = THREE.MathUtils.lerp(0.96, 0.90, t);
 
     // — Grading: exposure, reflections, bloom discipline in daylight —
     this.renderer.toneMappingExposure = THREE.MathUtils.lerp(NIGHT.exposure, DAY.exposure, t);

@@ -35,10 +35,10 @@ export const PLATFORM = {
 
 export const SOLAR = {
   // Main field on the left of the platform
-  field: { cx: -46, cz: -2, cols: 17, rows: 22, colPitch: 4.7, rowPitch: 3.55, yaw: 0.3 },
+  field: { cx: -46, cz: -2, cols: 22, rows: 17, colPitch: 3.55, rowPitch: 4.7, yaw: 0.3 },
   // Small satellite array top-right (mirrors the reference)
-  satellite: { cx: 52, cz: -56, cols: 9, rows: 3, colPitch: 4.4, rowPitch: 3.4, yaw: 0.06 },
-  panelW: 3.5, panelH: 2.15, tilt: -0.34, fill: 0.88,
+  satellite: { cx: 52, cz: -56, cols: 3, rows: 9, colPitch: 3.4, rowPitch: 4.4, yaw: 0.06 },
+  panelW: 4.5, panelH: 2.8, tilt: -0.34, fill: 0.88,
 };
 
 export const TURBINES = [

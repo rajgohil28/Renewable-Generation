@@ -6,9 +6,9 @@
 import gsap from 'gsap';
 
 const STATS = {
-  total: 86.7,
+  total: 30,
   solar: 26,
-  wind: 30.7,
+  wind: 4,
   devices: 128,
   active: 124,
   offline: 4,
